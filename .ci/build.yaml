@@ -1,0 +1,26 @@
+parameters:
+  host: ''
+  pool: ''
+  sign: false
+
+jobs:
+- job: ${{ parameters.host }}
+  pool: ${{ parameters.pool }}
+  steps:
+  - ${{ if eq(parameters.host, 'macOS') }}:
+    - script: brew install pkg-config
+      displayName: 'Install pkg-config (for testing)'
+  - ${{ if eq(parameters.host, 'Windows') }}:
+    - script: 'npm install -g esy@latest --unsafe-perm'
+      displayName: 'Install esy'
+  - ${{ if ne(parameters.host, 'Windows') }}:
+    - script: 'sudo npm install -g esy@latest --unsafe-perm'
+      displayName: 'Install esy'
+  - script: esy install
+    displayName: 'esy install'
+  - ${{ if eq(parameters.host, 'Windows') }}:
+    - script: esy b
+      displayName: 'esy build'
+  - ${{ if ne(parameters.host, 'Windows') }}:
+    - script: 'esy x pkg-config --libs libav-12.3'
+      displayName: 'esy x pkg-config --libs libav-12.3'
